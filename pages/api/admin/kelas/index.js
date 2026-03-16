@@ -92,14 +92,27 @@ export default async function handler(req, res) {
       }
 
       if (wali_kelas_id) {
+        // Cek apakah user eksis dan benar guru
         const [[guru]] = await db.execute(
-          "SELECT id FROM users WHERE id = ? AND role = 'guru'",
+          "SELECT id, nama FROM users WHERE id = ? AND role = 'guru'",
           [wali_kelas_id]
         );
 
         if (!guru) {
           return res.status(400).json({
             message: "Wali kelas harus berasal dari user dengan role guru",
+          });
+        }
+
+        // Cek apakah guru ini sudah menjadi wali kelas di kelas lain
+        const [existingWali] = await db.execute(
+          "SELECT nama_kelas FROM kelas WHERE wali_kelas_id = ?",
+          [wali_kelas_id]
+        );
+
+        if (existingWali.length > 0) {
+          return res.status(400).json({
+            message: `Guru tersebut sudah menjadi wali kelas di kelas ${existingWali[0].nama_kelas}. Silakan pilih guru lain.`,
           });
         }
       }
@@ -139,8 +152,21 @@ export default async function handler(req, res) {
         });
       }
 
+      // MODIFIKASI: Cek duplikat wali kelas untuk edit
+      if (wali_kelas_id) {
+        const [existingWali] = await db.execute(
+          "SELECT nama_kelas FROM kelas WHERE wali_kelas_id = ? AND id != ?",
+          [wali_kelas_id, id]
+        );
+
+        if (existingWali.length > 0) {
+          return res.status(400).json({
+            message: `Guru tersebut sudah menjadi wali kelas di kelas ${existingWali[0].nama_kelas}. Silakan pilih guru lain.`,
+          });
+        }
+      }
+
       // ... (logika update lainnya) ...
-      // Anda bisa menambahkan logika update lengkap di sini jika belum ada
       await db.execute(
         `UPDATE kelas 
            SET nama_kelas = ?, jurusan_id = ?, tingkat_id = ?, wali_kelas_id = ?, updated_at = NOW()

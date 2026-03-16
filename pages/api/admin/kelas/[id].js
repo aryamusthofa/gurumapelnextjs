@@ -63,7 +63,21 @@ export default async function handler(req, res) {
             message: "Wali kelas harus berasal dari user dengan role guru",
           });
         }
+
+        // MODIFIKASI: Cek apakah guru ini sudah menjadi wali kelas di kelas lain
+        const [existingWali] = await db.execute(
+          "SELECT nama_kelas FROM kelas WHERE wali_kelas_id = ? AND id != ?",
+          [wali_kelas_id, id]
+        );
+
+        if (existingWali.length > 0) {
+          return res.status(400).json({
+            message: `Guru tersebut sudah menjadi wali kelas di kelas ${existingWali[0].nama_kelas}. Silakan pilih guru lain.`,
+          });
+        }
       }
+
+
 
       const [result] = await db.execute(
         `UPDATE kelas
