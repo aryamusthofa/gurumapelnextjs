@@ -1,16 +1,15 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { useNotif } from "@/app/components/Notif";
 import GuruModal from "./components/GuruModal";
+import MapelGuruModal from "./components/MapelGuruModal";
 import DeleteModal from "@/app/components/DeleteModal";
 
 export default function AdminGuruPage() {
   const [guru, setGuru] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const notif = useNotif();
 
   // Modal states
@@ -18,6 +17,8 @@ export default function AdminGuruPage() {
   const [editData, setEditData] = useState(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [mapelModalOpen, setMapelModalOpen] = useState(false);
+  const [mapelTarget, setMapelTarget] = useState(null);
 
   const fetchGuru = async () => {
     setLoading(true);
@@ -130,7 +131,7 @@ export default function AdminGuruPage() {
                         <button onClick={() => handleEdit(g)} className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all shadow-sm" title="Edit">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                         </button>
-                        <button onClick={() => router.push(`/admin/guru/mapel?guru_id=${g.id}`)} className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-all shadow-sm" title="Atur Mapel">
+                        <button onClick={() => { setMapelTarget(g); setMapelModalOpen(true); }} className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 flex items-center justify-center hover:bg-green-600 hover:text-white transition-all shadow-sm" title="Atur Mapel">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
                         </button>
                         <button onClick={() => handleDeleteClick(g)} className="w-9 h-9 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Hapus">
@@ -147,6 +148,7 @@ export default function AdminGuruPage() {
       </div>
 
       <GuruModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSuccess={handleModalSuccess} editData={editData} />
+      <MapelGuruModal isOpen={mapelModalOpen} onClose={() => setMapelModalOpen(false)} onSuccess={handleModalSuccess} guruData={mapelTarget} />
       <DeleteModal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} onConfirm={handleDeleteConfirm} itemName={deleteTarget?.nama} />
     </div>
   );
